@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-23 23:19:22
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:26:19
+ - @ Modified time: 2026-02-28 20:53:09
  - @ Description: İstemci (local) oyuncusunun diğer oyuncularla sohbet edip edemeyeceğini kontrol eden modül. Oyuncuların birbirlerini görüp göremeyeceği, birbirleriyle sohbet edip edemeyeceği gibi özellikleri yönetir.
 ]]
 
@@ -16,6 +16,8 @@ local Attributes = require(ReplicatedStorage.Framework.Shared.Config.Attributes)
 
 --// Assets
 local localPlayer = Players.LocalPlayer
+local Assets = ReplicatedStorage:WaitForChild("Assets")
+local BillboardTemplate = Assets:WaitForChild("MutualChatBillboard")
 
 --// Module
 local MutualChats = {
@@ -31,7 +33,16 @@ local function getPlayerChatGroups(player: Player)
         return {}
     end
 
-    return HttpService:JSONDecode(playerChatGroups)
+    local success, result = pcall(function()
+        return HttpService:JSONDecode(playerChatGroups)
+    end)
+
+    if success then
+        return result
+    else
+        warn(`⚠️ | Failed to decode chat groups for {player.Name}`)
+        return {}
+    end
 end
 
 --// Functions
@@ -59,66 +70,79 @@ function MutualChats:AttachBillboardToCharacter(character: Model)
         return
     end
 
-    local billboardClone = ReplicatedStorage:WaitForChild("Assets"):WaitForChild("MutualChatBillboard"):Clone()
-    billboardClone.Parent = character:WaitForChild("Head")
-    billboardClone.Adornee = character:WaitForChild("Head")
+    local head = character:WaitForChild("Head", 5)
+    if not head then return end
+
+    local billboardClone = BillboardTemplate:Clone()
+    billboardClone.Parent = head
+    billboardClone.Adornee = head
+end
+
+function MutualChats:HandlePlayer(player: Player)
+    -- Check if the player is ready, wait with timeout to prevent memory leak
+    if not player:GetAttribute(Attributes.Player.CHAT_GROUPS_LOADED) then
+        local connection
+        local bindable = Instance.new("BindableEvent")
+        
+        connection = player:GetAttributeChangedSignal(Attributes.Player.CHAT_GROUPS_LOADED):Connect(function()
+            if player:GetAttribute(Attributes.Player.CHAT_GROUPS_LOADED) then
+                bindable:Fire()
+            end
+        end)
+        
+        -- Fallback in case they leave or it takes too long
+        task.delay(10, function() bindable:Fire() end)
+        bindable.Event:Wait()
+        connection:Disconnect()
+        bindable:Destroy()
+        
+        -- If they left and destroyed
+        if not player.Parent then return end
+    end
+
+    print(`ℹ️ | Checking player {player.Name} for mutual chat status...`)
+
+    local function checkCharacter(character)
+        print(`ℹ️ | Player {player.Name}'s character has loaded. Checking mutual chat status...`)
+        
+        if self:LocalPlayerCanChatWith(player) then
+            print(`✅ | Local player can chat with {player.Name}.`)
+        else
+            print(`❌ | Local player cannot chat with {player.Name}. Attaching billboard...`)
+            self:AttachBillboardToCharacter(character)
+        end
+    end
+
+    if player.Character then
+        task.spawn(checkCharacter, player.Character)
+    end
+
+    player.CharacterAdded:Connect(checkCharacter)
 end
 
 function MutualChats:StartPlayersEvents()
     if not localPlayer:GetAttribute(Attributes.Player.CHAT_GROUPS_LOADED) then
         print("ℹ️ | Waiting for local player's chat groups to load...")
-        localPlayer:GetAttributeChangedSignal(Attributes.Player.CHAT_GROUPS):Wait()
+        localPlayer:GetAttributeChangedSignal(Attributes.Player.CHAT_GROUPS_LOADED):Wait()
     end
 
     print("ℹ️ | Local player's chat groups have been loaded. MutualChats is now active.")
 
+    Players.PlayerAdded:Connect(function(player)
+        self:HandlePlayer(player)
+    end)
+
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= localPlayer then
-            print(`ℹ️ | Checking existing player {player.Name} for mutual chat status...`)
-            
-            if player.Character and not self:LocalPlayerCanChatWith(player) then
-                print(`❌ | Local player cannot chat with {player.Name}. Attaching billboard to existing character...`)
-                self:AttachBillboardToCharacter(player.Character)
-            else
-                print(`✅ | Local player can chat with {player.Name} or character not loaded yet.`)
-            end
+            task.spawn(function()
+                self:HandlePlayer(player)
+            end)
         end
     end
-
-    Players.PlayerAdded:Connect(function(player)
-        if not player:GetAttribute(Attributes.Player.CHAT_GROUPS_LOADED) then
-            player:GetAttributeChangedSignal(Attributes.Player.CHAT_GROUPS):Wait()
-        end
-        
-        print(`ℹ️ | Player {player.Name} has joined and their chat groups are loaded. Checking mutual chat status...`)
-        
-        if player.Character and not self:LocalPlayerCanChatWith(player) then
-            print(`❌ | Local player cannot chat with {player.Name}. Attaching billboard to existing character...`)
-            self:AttachBillboardToCharacter(player.Character)
-        else
-            print(`✅ | Local player can chat with {player.Name} or character not loaded yet.`)
-        end
-
-        player.CharacterAdded:Connect(function()
-            print(`ℹ️ | Player {player.Name}'s character has loaded. Checking mutual chat status...`)
-            
-            if self:LocalPlayerCanChatWith(player) then
-                print(`✅ | Local player can chat with {player.Name}.`)
-                return                
-            end
-
-            print(`❌ | Local player cannot chat with {player.Name}.`)
-
-            local billboardClone = ReplicatedStorage:WaitForChild("Assets"):WaitForChild("MutualChatBillboard"):Clone()
-            billboardClone.Parent = player.Character:WaitForChild("Head")
-            billboardClone.Adornee = player.Character:WaitForChild("Head")
-        end)
-    end)
 end
 
 function MutualChats:Start()
     print("ℹ️ | Starting MutualChats module. Waiting for local player's chat groups to load...")
-
     self:StartPlayersEvents()
 end
 

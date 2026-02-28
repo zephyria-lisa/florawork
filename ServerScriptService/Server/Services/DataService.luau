@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-22 21:26:42
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:25:42
+ - @ Modified time: 2026-02-28 21:22:40
  - @ Description: Suucu tarafı için veri yönetimi servisi.
  ]]
 
@@ -113,6 +113,19 @@ function DataService:LoadPlayer(player: Player): boolean
     self._playerDatas[player.UserId] = data or DataConfig.defaultValues
 
     player:SetAttribute(Attributes.Player.IS_LOADED, true)
+
+    if DataConfig.AUTO_SAVE then
+        task.spawn(function()
+            while task.wait(DataConfig.AUTO_SAVE_DELAY) do
+                self:SavePlayer(player)
+                
+                if not player or player.Parent == nil then
+                    break
+                end
+            end
+        end)
+    end
+
     return true
 end
 

@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-22 19:58:19
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:26:13
+ - @ Modified time: 2026-02-28 20:44:54
  - @ Description: Client tarafı için bootstrapper.
 ]]
 
@@ -28,6 +28,7 @@ local function storeRawModules()
 		for _, module in root:GetDescendants() do
 			if module:IsA("ModuleScript") then
 				table.insert(RawModules, require(module))
+
 			end
 		end
 	end

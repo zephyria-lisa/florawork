@@ -1,8 +1,8 @@
 --[[
     📖 Service Directory Overview (English)
     ---------------------------------------
-    This README provides a concise summary of the public functions
-    available in each service module located in this folder. The goal
+ - @ Modified by: flora
+ - @ Modified time: 2026-02-28 21:12:14
     is to make it easy for developers to see what utilities are
     implemented and how to call them. ✨
 
@@ -12,7 +12,9 @@
       • MarketplaceHandler
       • SafeTeleportService
       • ReceiptService
+      • ServerCooldownService
       • Client Services / MutualChats
+      • Shared Utils / TimeUtils
 
     Each section below lists every exported function together with
     parameter names and a brief description.
@@ -104,6 +106,22 @@
         attribute if the teleport call errors. Always returns true (errors
         are logged internally).
 
+    ⏱️ ServerCooldownService
+    ------------------------
+    *InitCooldowns(cooldownsTable: { [string]: number })* ⚙️
+      Initializes cooldown trackers based on the provided table of
+      names and durations.
+
+    *StartCooldown(cooldownName: string)* ⏳
+      Starts or restarts the timer for the specified cooldown.
+
+    *IsOnCooldown(cooldownName: string) -> boolean* 🛡️
+      Checks if the specific cooldown is currently active. Returns true
+      if time remains.
+
+    *GetRemainingTime(cooldownName: string) -> number* 🔢
+      Returns the exact seconds remaining on a cooldown. Returns 0 if
+      it has expired or doesn't exist.
 
     💻 Client Services
     ------------------
@@ -123,6 +141,26 @@
           Entry point; waits for the local player's groups and then begins
           processing.
 
+
+    🛠️ Shared Utilities
+    -------------------
+    The following shared utility modules are stored under:
+      ReplicatedStorage/Framework/Shared/Util/
+      
+    ⏱️ TimeUtils
+      - FormatToMMSS(seconds: number) 🕒
+          Converts total seconds into a MM:SS format (e.g., "05:30").
+      - FormatToHHMMSS(seconds: number) ⏱️
+          Converts total seconds into a HH:MM:SS format (e.g., "01:05:30").
+      - FormatToShortDHMS(seconds: number, useTurkish: boolean?) 📅
+          Converts seconds into a short readable string (e.g., "1d 2h 5m").
+      - GetTimeSince(unixTimestamp: number, useTurkish: boolean?) 🕰️
+          Returns a formatted string of how long ago a specific os.time() 
+          timestamp was (e.g., "5 minutes ago").
+      - GetElapsedSeconds(startTick: number) ⌛
+          Returns the elapsed time in seconds with decimal precision 
+          since the provided startTick.
+
     ========================================================================
 
     📖 Servis Dizini Özeti (Türkçe Çeviri)
@@ -136,7 +174,9 @@
       • EasyAnalytics (Analitik Servisi)
       • SafeTeleportService (Güvenli Işınlanma)
       • ReceiptService (Makbuz Servisi)
+      • ServerCooldownService (Sunucu Bekleme Süresi Servisi)
       • Client Services / MutualChats (İstemci Servisleri)
+      • Shared Utils / TimeUtils (Ortak Zaman Araçları)
 
     Her bölüm, dışa aktarılan her fonksiyonu, parametrelerini ve ne işe 
     yaradığını kısa bir açıklamayla listeler.
@@ -227,6 +267,23 @@
       kullanır. Işınlanma çağrısı hata verirse `IS_BEING_TELEPORTED` niteliğini 
       (attribute) sıfırlar. Her zaman true döner (hatalar arka planda kaydedilir).
 
+    ⏱️ ServerCooldownService (Sunucu Bekleme Süresi Servisi)
+    --------------------------------------------------------
+    *InitCooldowns(cooldownsTable: { [string]: number })* ⚙️
+      Sağlanan isim ve süre tablosuna (saniye cinsinden) göre 
+      bekleme süresi sayaçlarını (cooldowns) başlatır.
+
+    *StartCooldown(cooldownName: string)* ⏳
+      Belirtilen soğuma (cooldown) süresi için zamanlayıcıyı başlatır 
+      veya yeniden başlatır.
+
+    *IsOnCooldown(cooldownName: string) -> boolean* 🛡️
+      Belirtilen bekleme süresinin şu anda aktif olup olmadığını kontrol 
+      eder. Süre devam ediyorsa true döner.     
+
+    *GetRemainingTime(cooldownName: string) -> number* 🔢
+      Bekleme süresinin bitmesine kalan tam saniyeyi döner. Sona ermişse
+      veya mevcut değilse 0 döner.
 
     💻 Client Services (İstemci Servisleri)
     ---------------------------------------
@@ -246,6 +303,26 @@
       - Start() 🏁
           Başlangıç noktasıdır; yerel oyuncunun gruplarının yüklenmesini 
           bekler ve ardından işlemleri başlatır.
+
+
+    🛠️ Shared Utilities (Ortak Araçlar)
+    -----------------------------------
+    Aşağıdaki ortak araç modülleri şu dizinde bulunur:
+      ReplicatedStorage/Framework/Shared/Util/
+      
+    ⏱️ TimeUtils (Zaman Araçları)
+      - FormatToMMSS(seconds: number) 🕒
+          Toplam saniyeyi MM:SS formatına dönüştürür (örn. "05:30").
+      - FormatToHHMMSS(seconds: number) ⏱️
+          Toplam saniyeyi HH:MM:SS formatına dönüştürür (örn. "01:05:30").
+      - FormatToShortDHMS(seconds: number, useTurkish: boolean?) 📅
+          Saniyeyi okunabilir kısa bir dizeye dönüştürür (örn. "1g 2sa 5dk").
+      - GetTimeSince(unixTimestamp: number, useTurkish: boolean?) 🕰️
+          Belirli bir os.time() zaman damgasının üzerinden ne kadar zaman 
+          geçtiğini formatlı döndürür (örn. "5 dakika önce").
+      - GetElapsedSeconds(startTick: number) ⌛
+          Verilen startTick'ten bu yana geçen süreyi ondalık hassasiyetle 
+          saniye cinsinden döndürür.
 
     🎉 End of services README. / Servisler README'sinin Sonu.
 ]]
