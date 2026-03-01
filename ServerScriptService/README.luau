@@ -13,7 +13,9 @@
       • SafeTeleportService
       • ReceiptService
       • ServerCooldownService
+      • EasyLeaderboard
       • Client Services / MutualChats
+      • Shared Utils / Maid
       • Shared Utils / TimeUtils
 
     Each section below lists every exported function together with
@@ -141,12 +143,43 @@
           Entry point; waits for the local player's groups and then begins
           processing.
 
+    🏆 EasyLeaderboard
+    ------------------
+    *Init()* ⚙️
+      Initializes the OrderedDataStores for the leaderboards defined in the config.
+
+    *UpdateLeaderboards()* 🔄
+      Iterates over loaded players and updates their leaderboard values based on
+      DataService keys.
+
+    *GetLeaderboardData(dataKey: string, pageSize: number?) -> GlobalDataStorePage?* 📊
+      Returns a sorted datastore page containing the top players for the given
+      data key.
+
+    *Start()* 🏁
+      Starts an asynchronous loop that automatically updates the leaderboards at
+      interals specified in LeaderboardConfig.
+
+
 
     🛠️ Shared Utilities
     -------------------
     The following shared utility modules are stored under:
       ReplicatedStorage/Framework/Shared/Util/
       
+    🧹 Maid
+      - Maid.new() -> Maid 🏗️
+          Constructs and returns a new Maid object.
+      - Maid.isMaid(value: any) -> boolean 🔍
+          Returns true if the provided value is a valid Maid instance.
+      - GiveTask(task: Task) -> number? 📝
+          Adds a task (e.g., RBXScriptConnection, Instance, function) to the Maid.
+          Returns the task index on success.
+      - DoCleaning() 🧼
+          Executes and cleans up all tasks currently tracked by the Maid.
+      - Destroy() 💥
+          Alias for DoCleaning().
+
     ⏱️ TimeUtils
       - FormatToMMSS(seconds: number) 🕒
           Converts total seconds into a MM:SS format (e.g., "05:30").
@@ -175,7 +208,9 @@
       • SafeTeleportService (Güvenli Işınlanma)
       • ReceiptService (Makbuz Servisi)
       • ServerCooldownService (Sunucu Bekleme Süresi Servisi)
+      • EasyLeaderboard (Kolay Liderlik Tablosu)
       • Client Services / MutualChats (İstemci Servisleri)
+      • Shared Utils / Maid (Temizlikçi)
       • Shared Utils / TimeUtils (Ortak Zaman Araçları)
 
     Her bölüm, dışa aktarılan her fonksiyonu, parametrelerini ve ne işe 
@@ -304,12 +339,44 @@
           Başlangıç noktasıdır; yerel oyuncunun gruplarının yüklenmesini 
           bekler ve ardından işlemleri başlatır.
 
+    🏆 EasyLeaderboard (Kolay Liderlik Tablosu)
+    -------------------------------------------
+    *Init()* ⚙️
+      Konfigürasyonda tanımlanan sıralı veri depolarını (OrderedDataStores)
+      başlatır.
+
+    *UpdateLeaderboards()* 🔄
+      Yüklenmiş oyuncuları tarar ve DataService anahtarlarına göre 
+      liderlik tablosu değerlerini günceller.
+
+    *GetLeaderboardData(dataKey: string, pageSize: number?) -> GlobalDataStorePage?* 📊
+      Verilen veri anahtarı için en iyi oyuncuları içeren sıralanmış 
+      bir veri deposu sayfası döndürür.
+
+    *Start()* 🏁
+      Satın alımları ve liderlik tablosunu, LeaderboardConfig'de belirtilen 
+      aralıklarla otomatik olarak güncelleyen eşzamansız bir döngü başlatır.
+
+
 
     🛠️ Shared Utilities (Ortak Araçlar)
     -----------------------------------
     Aşağıdaki ortak araç modülleri şu dizinde bulunur:
       ReplicatedStorage/Framework/Shared/Util/
       
+    🧹 Maid (Temizlikçi)
+      - Maid.new() -> Maid 🏗️
+          Yeni bir Maid objesi oluşturur ve döndürür.
+      - Maid.isMaid(value: any) -> boolean 🔍
+          Sağlanan değerin geçerli bir Maid örneği olup olmadığını kontrol eder.
+      - GiveTask(task: Task) -> number? 📝
+          Maid'e yeni bir görev (RBXScriptConnection, Instance, fonksiyon vb.) ekler.
+          Başarılı olursa görevin index numarasını döner.
+      - DoCleaning() 🧼
+          Mevcut olarak Maid tarafından izlenen tüm görevleri çalıştırır ve temizler.
+      - Destroy() 💥
+          DoCleaning() için alias (takma ad).
+
     ⏱️ TimeUtils (Zaman Araçları)
       - FormatToMMSS(seconds: number) 🕒
           Toplam saniyeyi MM:SS formatına dönüştürür (örn. "05:30").
