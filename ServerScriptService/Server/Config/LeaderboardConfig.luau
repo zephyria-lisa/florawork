@@ -2,12 +2,12 @@
  - @ Author: flora
  - @ Create Time: 2026-03-01 18:18:48
  - @ Modified by: flora
- - @ Modified time: 2026-03-01 22:13:01
+ - @ Modified time: 2026-03-01 23:40:34
  - @ Description: EasyLeaderboard için konfigürasyon dosyası.
 ]]
 
 --// Types
-type LeaderboardData = {
+export type LeaderboardData = {
     DataKey: string,
 }
 

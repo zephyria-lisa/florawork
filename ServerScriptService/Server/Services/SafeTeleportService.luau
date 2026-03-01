@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-25 21:59:42
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:25:37
+ - @ Modified time: 2026-03-01 23:41:54
  - @ Description: Oyuncuların güvenli bir şekilde teleport olmalarını sağlayan modül. Teleport işlemi sırasında oyuncuların konumlarını kontrol eder, güvenli bir alan olup olmadığını belirler ve teleport işlemini gerçekleştirir. Ayrıca, teleport işlemi sırasında oluşabilecek hataları engeller.
 ]]
 
@@ -37,7 +37,11 @@ function SafeTeleportService:ForceReserveServer(placeId: number)
     end
 end
 
-function SafeTeleportService:SafeTeleportPlayers(players: { Player }, placeId: number, reservedServerCode: string?)
+function SafeTeleportService:SafeTeleportPlayers(
+    players: { Player }, 
+    placeId: number, 
+    reservedServerCode: string?
+)
     local teleportOptions = Instance.new("TeleportOptions")
 
     for _, player in players do

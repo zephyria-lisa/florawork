@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-23 23:19:22
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 20:53:09
+ - @ Modified time: 2026-03-01 23:45:22
  - @ Description: İstemci (local) oyuncusunun diğer oyuncularla sohbet edip edemeyeceğini kontrol eden modül. Oyuncuların birbirlerini görüp göremeyeceği, birbirleriyle sohbet edip edemeyeceği gibi özellikleri yönetir.
 ]]
 

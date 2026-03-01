@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-22 21:55:02
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:26:29
+ - @ Modified time: 2026-03-01 23:44:54
  - @ Description: Net modülü, istemci ve sunucu arasında iletişim kurmak için kullanılan bir ağ (network) modülüdür. 
 ]]
 
@@ -15,16 +15,13 @@ local IS_SERVER = RunService:IsServer()
 local IS_CLIENT = RunService:IsClient()
 
 --// Module
-local Net = {}
+local Net = {
+	_events = {},
+	_functions = {},
+	_connections = {}
+}
 
---// Private properties
-Net._events = {}
-Net._functions = {}
-Net._connections = {}
-
---// Helper functions
-
---- Validates if a remote event exists and returns it
+--// Functions
 local function getRemoteEvent(self: any, remoteName: string): RemoteEvent?
 	local remote = self._events[remoteName]
 	if not remote then
@@ -34,7 +31,6 @@ local function getRemoteEvent(self: any, remoteName: string): RemoteEvent?
 	return remote
 end
 
---- Validates if a remote function exists and returns it
 local function getRemoteFunction(self: any, remoteName: string): RemoteFunction?
 	local remote = self._functions[remoteName]
 	if not remote then
@@ -44,9 +40,6 @@ local function getRemoteFunction(self: any, remoteName: string): RemoteFunction?
 	return remote
 end
 
---// Fire Events
-
---- Fires a remote event to a specific client (Server only)
 function Net:FireClient(remoteName: string, player: Player, ...: any?)
 	if not IS_SERVER then
 		return
@@ -58,7 +51,6 @@ function Net:FireClient(remoteName: string, player: Player, ...: any?)
 	end
 end
 
---- Fires a remote event to all clients (Server only)
 function Net:FireAllClients(remoteName: string, ...: any?)
 	if not IS_SERVER then
 		print(`⚠️ | Attempted to fire remote event "{remoteName}" to all clients from the client side. This action is not allowed.`)
@@ -74,7 +66,6 @@ function Net:FireAllClients(remoteName: string, ...: any?)
 	end
 end
 
---- Fires a remote event to the server (Client only)
 function Net:FireServer(remoteName: string, ...: any?)
 	if not IS_CLIENT then
 		return
@@ -86,9 +77,6 @@ function Net:FireServer(remoteName: string, ...: any?)
 	end
 end
 
---// Invoke Functions
-
---- Invokes a remote function on the server (Client only)
 function Net:InvokeServer(remoteName: string, ...: any?)
 	if not IS_CLIENT then
 		return
@@ -100,10 +88,6 @@ function Net:InvokeServer(remoteName: string, ...: any?)
 	end
 end
 
---// Event Binding
-
---- Binds a callback to a server event (Server only)
---- Returns the connection so it can be disconnected later
 function Net:BindServerEvent(selfData: any, remoteName: string, callback: (selfData: any, player: Player, ...any) -> ())
 	if not IS_SERVER then
 		return
@@ -118,7 +102,6 @@ function Net:BindServerEvent(selfData: any, remoteName: string, callback: (selfD
 		callback(selfData, player, ...)
 	end)
 	
-	-- Track connection for cleanup
 	if not self._connections[remoteName] then
 		self._connections[remoteName] = {}
 	end
@@ -127,8 +110,6 @@ function Net:BindServerEvent(selfData: any, remoteName: string, callback: (selfD
 	return connection
 end
 
---- Binds a callback to a client event (Client only)
---- Returns the connection so it can be disconnected later
 function Net:BindClientEvent(remoteName: string, callback: (selfData: any, ...any?) -> (), selfData: any)
 	if not IS_CLIENT then
 		return
@@ -143,7 +124,6 @@ function Net:BindClientEvent(remoteName: string, callback: (selfData: any, ...an
 		callback(selfData, ...)
 	end)
 	
-	-- Track connection for cleanup
 	if not self._connections[remoteName] then
 		self._connections[remoteName] = {}
 	end
@@ -152,7 +132,6 @@ function Net:BindClientEvent(remoteName: string, callback: (selfData: any, ...an
 	return connection
 end
 
---- Binds a callback to a server function (Server only)
 function Net:BindServerFunction(selfData: any, remoteName: string, callback: (selfData: any, player: Player, ...any?) -> any?)
 	if not IS_SERVER then
 		return
@@ -166,9 +145,6 @@ function Net:BindServerFunction(selfData: any, remoteName: string, callback: (se
 	end
 end
 
---// Cleanup
-
---- Disconnects all connections for a specific remote
 function Net:Disconnect(remoteName: string)
 	if self._connections[remoteName] then
 		for _, connection in self._connections[remoteName] do
@@ -178,7 +154,6 @@ function Net:Disconnect(remoteName: string)
 	end
 end
 
---- Disconnects all connections
 function Net:DisconnectAll()
 	for remoteName, connections in self._connections do
 		for _, connection in connections do
@@ -188,17 +163,13 @@ function Net:DisconnectAll()
 	self._connections = {}
 end
 
---// Initialization
-
 function Net:Init()
 	print(`ℹ️ | Initializing Net on the {if IS_SERVER then "server" else "client"} side.`)
 	
-	-- Load remotes folder
 	local remotesFolder = ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Shared"):WaitForChild("Remotes")
 	local eventsFolder = remotesFolder:FindFirstChild("Events")
 	local functionsFolder = remotesFolder:FindFirstChild("Functions")
 	
-	-- Load remote functions
 	if functionsFolder then
 		for _, remoteFunction in functionsFolder:GetChildren() do
 			if remoteFunction:IsA("RemoteFunction") then
@@ -207,7 +178,6 @@ function Net:Init()
 		end
 	end
 	
-	-- Load remote events
 	if eventsFolder then
 		for _, remoteEvent in eventsFolder:GetChildren() do
 			if remoteEvent:IsA("RemoteEvent") then
