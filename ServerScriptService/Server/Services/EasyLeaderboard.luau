@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-03-01 18:18:14
  - @ Modified by: flora
- - @ Modified time: 2026-03-01 22:16:43
+ - @ Modified time: 2026-03-05 23:41:20
  - @ Description: Kolay liderlik tablosu sistemi. Projelere kolayca entegre edilebilir.
 ]]
 
@@ -10,10 +10,11 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 --// Modules
 local Attributes = require(ReplicatedStorage.Framework.Shared.Config.Attributes)
-local LeaderboardConfig = require(ReplicatedStorage.Framework.Server.Config.LeaderboardConfig)
+local LeaderboardConfig = require(ServerScriptService.Server.Config.LeaderboardConfig)
 
 --// Module
 local EasyLeaderboard = {
