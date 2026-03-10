@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-22 21:48:21
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 18:26:04
+ - @ Modified time: 2026-03-09 23:10:07
  - @ Description: Oyuncu verilerini yönetmek için sunucu tarafı modülü. Verilerin kaydedilmesi, yüklenmesi ve güncellenmesi gibi işlemleri içerir.
 ]]
 
@@ -39,7 +39,7 @@ end
 local function playerRemoving(player: Player)
     print(`👋 | Player removing: {player.Name} (ID: {player.UserId})`)
 
-    PlayerHandler.DataService:SavePlayer(player)
+    PlayerHandler.DataService:SavePlayer(player, true)
 end
 
 function PlayerHandler:FindPlayer(username: string): Player?

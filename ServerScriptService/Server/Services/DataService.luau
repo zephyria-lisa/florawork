@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-22 21:26:42
  - @ Modified by: flora
- - @ Modified time: 2026-02-28 21:22:40
+ - @ Modified time: 2026-03-09 23:14:45
  - @ Description: Suucu tarafı için veri yönetimi servisi.
  ]]
 
@@ -27,7 +27,7 @@ function DataService:Init()
     self._playerDatas = {}
 end
 
-function DataService:SavePlayer(player: Player): boolean
+function DataService:SavePlayer(player: Player, releaseLock: boolean?): boolean
     if not player:GetAttribute(Attributes.Player.IS_LOADED) then
         warn(`⚠️ | {self.Name}: Attempted to save data for player {player.Name} who is not fully loaded.`)
         return false
@@ -52,6 +52,11 @@ function DataService:SavePlayer(player: Player): boolean
                 newData[key] = value
             end
             
+            newData.Metadata = {
+                SessionId = if releaseLock then nil else game.JobId,
+                LastSaved = os.time(),
+            }
+
             return newData
         end)
     end)
@@ -67,16 +72,49 @@ function DataService:SavePlayer(player: Player): boolean
 end
 
 function DataService:LoadPlayer(player: Player): boolean
-    local success, data = pcall(function()
-        return self._playerDataStore:GetAsync(player.UserId)
+    local sessionLockDetected = false
+    local data = nil
+    local success, erorrMessage = pcall(function()
+        self._playerDataStore:UpdateAsync(player.UserId, function(oldData)
+            local newData = if typeof(oldData) == "table" then oldData else {}
+            
+            if newData.Metadata and newData.Metadata.SessionId and newData.Metadata.SessionId ~= game.JobId then
+                if (os.time() - newData.Metadata.LastSaved) < DataConfig.SESSION_LOCK_EXPIRATION * 60 then
+                    sessionLockDetected = true
+                    return nil
+                end
+            end
+
+            for key, value in DataConfig.defaultValues do
+                if newData[key] == nil then
+                    newData[key] = value
+                end
+            end
+
+            newData.Metadata = {
+                SessionId = game.JobId,
+                LastSaved = os.time(),
+            }
+
+            data = newData
+
+            return newData
+        end)
     end)
+
+    if sessionLockDetected then
+        warn(`⚠️ | {self.Name}: Session lock detected for player {player.Name}.`) 
+        player:Kick("Session lock detected. Please try again later.")
+
+        return false
+    end
 
     if not data then
         data = DataConfig.defaultValues
     end
 
     if not success then
-        warn(`⚠️ | {self.Name}: Failed to load data for player {player.Name}. Error: {data}`)
+        warn(`⚠️ | {self.Name}: Failed to load data for player {player.Name}. Error: {erorrMessage}`)
         return false
     end
 
@@ -117,11 +155,11 @@ function DataService:LoadPlayer(player: Player): boolean
     if DataConfig.AUTO_SAVE then
         task.spawn(function()
             while task.wait(DataConfig.AUTO_SAVE_DELAY) do
-                self:SavePlayer(player)
-                
                 if not player or player.Parent == nil then
                     break
                 end
+                
+                self:SavePlayer(player, false)
             end
         end)
     end

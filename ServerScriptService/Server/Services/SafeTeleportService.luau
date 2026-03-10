@@ -2,7 +2,7 @@
  - @ Author: flora
  - @ Create Time: 2026-02-25 21:59:42
  - @ Modified by: flora
- - @ Modified time: 2026-03-01 23:41:54
+ - @ Modified time: 2026-03-09 23:23:42
  - @ Description: Oyuncuların güvenli bir şekilde teleport olmalarını sağlayan modül. Teleport işlemi sırasında oyuncuların konumlarını kontrol eder, güvenli bir alan olup olmadığını belirler ve teleport işlemini gerçekleştirir. Ayrıca, teleport işlemi sırasında oluşabilecek hataları engeller.
 ]]
 
@@ -48,7 +48,7 @@ function SafeTeleportService:SafeTeleportPlayers(
         player:SetAttribute(Attributes.Player.IS_BEING_TELEPORTED, true)
 
         for i = 1, 5 do
-            local status = self.DataService:SavePlayer(player)
+            local status = self.DataService:SavePlayer(player, true)
 
             if status then
                 break
